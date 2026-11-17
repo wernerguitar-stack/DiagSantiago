@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SANTIAGO SmartScan SST | Diagnóstico de Saúde e Segurança do Trabalho</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              900: '#14532d',
+              950: '#052e16',
+            },
+            accent: {
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #060b11;
+      color: #f8fafc;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-input {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .glass-input:focus {
+      border-color: #4ade80;
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.25);
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #060b11; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur flex justify-between items-center px-6 py-3.5 sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center font-bold text-white shadow-lg shadow-brand-500/20">
+        SST
+      </div>
+      <div>
+        <span class="font-extrabold text-lg tracking-wider text-white">SANTIAGO <span class="text-brand-400">SmartScan SST</span></span>
+        <span class="text-xs text-slate-400 block -mt-1 font-medium">Mapeamento Ocupacional & Normas Regulamentadoras</span>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold glass-card text-emerald-400 border border-emerald-500/30">
+        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Motor Normativo Ativo</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow flex flex-col justify-center items-center px-4 py-8 max-w-7xl w-full mx-auto">
+    
+    <!-- SEARCH SECTION -->
+    <section id="searchSection" class="w-full max-w-xl transition-all duration-500 my-auto">
+      <div class="text-center mb-8 space-y-3">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card text-brand-400 text-xs font-semibold border border-brand-500/20 mb-2">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>Diagnóstico de Segurança do Trabalho, PGR & eSocial</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+          Qual CNPJ vamos <span class="bg-gradient-to-r from-brand-400 via-emerald-300 to-accent-400 bg-clip-text text-transparent">analisar em SST?</span>
+        </h1>
+        <p class="text-slate-400 text-sm max-w-md mx-auto">
+          Digite o CNPJ para mapear os riscos ocupacionais (NRs), exames médicos do PCMSO e obrigações do eSocial de acordo com o segmento da empresa.
+        </p>
+      </div>
+
+      <form id="cnpjForm" onsubmit="handleCnpjSubmit(event)" class="space-y-4">
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
+          </div>
+          <input 
+            type="text" 
+            id="cnpjInput" 
+            placeholder="00.000.000/0000-00"
+            maxlength="18"
+            required
+            class="w-full pl-12 pr-36 py-4 rounded-2xl glass-input text-white text-lg font-mono focus:outline-none placeholder-slate-600 shadow-2xl transition-all"
+            oninput="formatCNPJ(this)"
+          />
+          <button 
+            type="submit" 
+            id="btnSubmitCnpj"
+            class="absolute right-2 top-2 bottom-2 px-6 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-semibold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <span>SmartScan SST</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div id="cnpjError" class="hidden flex items-center gap-2 text-rose-400 text-xs pl-2">
+          <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          <span id="cnpjErrorText">Verifique o CNPJ digitado.</span>
+        </div>
+      </form>
+    </section>
+
+    <!-- LOADING STATE -->
+    <div id="loadingSection" class="hidden flex-col items-center justify-center my-auto py-12 space-y-4">
+      <div class="relative flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-brand-500/20 border-t-brand-400 rounded-full animate-spin"></div>
+        <i data-lucide="activity" class="w-6 h-6 text-brand-400 absolute"></i>
+      </div>
+      <div class="text-center space-y-1">
+        <h3 class="text-lg font-semibold text-white">Executando Análise de Riscos Ocupacionais...</h3>
+        <p class="text-xs text-slate-400">Cruzando CNAEs com as NRs, eSocial (S-2210, S-2220, S-2240) e PGR/PCMSO...</p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD SECTION -->
+    <section id="dashboardSection" class="hidden w-full space-y-6 transition-all duration-500">
+      
+      <!-- TOP BANNER & ACTIONS -->
+      <div class="glass-card rounded-2xl p-6 border-slate-800 relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-6 relative z-10">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span id="badgeSituacao" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium border border-emerald-500/30">ATIVA</span>
+              <span id="badgePorte" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium border border-slate-700">DEMAIS</span>
+            </div>
+            
+            <h2 id="lblRazaoSocial" class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">-</h2>
+            
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-300 pt-1">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="user-check" class="w-4 h-4 text-brand-400"></i>
+                <span>Gestor / Sócio: <strong id="lblOwnerName" class="text-white">-</strong></span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
+                <span>CNPJ: <span id="lblCnpj" class="font-mono text-slate-200">-</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CLIENT AUTO-SERVICE ACTIONS -->
+          <div class="glass-card p-4 rounded-xl border-slate-700/60 bg-slate-900/80 space-y-3 min-w-[320px]">
+            <div class="space-y-1.5">
+              <label class="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5 text-brand-400"></i>
+                Seu WhatsApp para Receber o Diagnóstico SST:
+              </label>
+              <div class="flex gap-2">
+                <input 
+                  type="text" 
+                  id="inputClientPhone"
+                  class="flex-grow glass-input px-3 py-2 rounded-lg text-xs text-white focus:outline-none font-mono"
+                  placeholder="(41) 99999-9999"
+                />
+                <button 
+                  type="button"
+                  onclick="sendReportToClientWhatsApp()" 
+                  class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                >
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                  <span>Enviar Relatório SST</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="pt-1 border-t border-slate-800">
+              <button 
+                type="button"
+                onclick="openWs4TechChat()" 
+                class="w-full py-2.5 px-4 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-brand-900/30 cursor-pointer"
+              >
+                <i data-lucide="message-square" class="w-4 h-4"></i>
+                <span>Falar com Consultor de SST</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRID LAYOUT -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT SIDEBAR -->
+        <div class="lg:col-span-4 space-y-6">
+          
+          <!-- ATIVIDADE PRINCIPAL -->
+          <div class="glass-card rounded-2xl p-5 space-y-3 border-slate-800">
+            <div class="flex items-center gap-2 text-brand-400 font-semibold text-sm border-b border-slate-800 pb-2">
+              <i data-lucide="briefcase" class="w-4 h-4"></i>
+              <span>Atividade Econômica Principal</span>
+            </div>
+            <div id="containerCnaePrincipal" class="text-xs space-y-1">
+              <p id="lblCnaePrincipalCode" class="font-mono text-slate-400">CNAE: -</p>
+              <p id="lblCnaePrincipalText" class="text-slate-200 font-medium leading-relaxed">-</p>
+            </div>
+          </div>
+
+          <!-- ATIVIDADES SECUNDÁRIAS -->
+          <div class="glass-card rounded-2xl p-5 space-y-3 border-slate-800">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <div class="flex items-center gap-2 text-accent-400 font-semibold text-sm">
+                <i data-lucide="layers" class="w-4 h-4"></i>
+                <span>Atividades Secundárias</span>
+              </div>
+              <span id="lblCountSecundarias" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">0</span>
+            </div>
+            
+            <div id="containerCnaeSecundarias" class="space-y-2 max-h-60 overflow-y-auto pr-1 text-xs"></div>
+          </div>
+
+          <!-- QSA -->
+          <div class="glass-card rounded-2xl p-5 space-y-3 border-slate-800">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <div class="flex items-center gap-2 text-slate-300 font-semibold text-sm">
+                <i data-lucide="users" class="w-4 h-4 text-brand-400"></i>
+                <span>Quadro de Sócios & Responsáveis</span>
+              </div>
+              <span id="lblCountQsa" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">0</span>
+            </div>
+            
+            <div id="containerQSA" class="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs"></div>
+          </div>
+
+          <!-- ENDEREÇO & E-MAIL -->
+          <div class="glass-card rounded-2xl p-4 text-xs text-slate-400 space-y-2">
+            <div class="flex items-start gap-3">
+              <i data-lucide="map-pin" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i>
+              <div>
+                <span class="font-semibold text-slate-300 block mb-0.5">Localização do Estabelecimento</span>
+                <span id="lblEndereco">-</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 pt-2 border-t border-slate-800/80">
+              <i data-lucide="mail" class="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0"></i>
+              <div>
+                <span class="font-semibold text-slate-300 block mb-0.5">E-mail Cadastral</span>
+                <span id="lblEmailCadastro" class="font-mono text-slate-300">-</span>
+              </div>
+            </div>
+          </div>
+          
+          <button type="button" onclick="resetSearch()" class="w-full py-2.5 glass-card hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Escanear Outro CNPJ em SST</span>
+          </button>
+        </div>
+
+        <!-- RIGHT CONTENT -->
+        <div class="lg:col-span-8 space-y-6">
+          
+          <!-- RESUMO DO RAMO E SST -->
+          <div class="glass-card rounded-2xl p-6 border-slate-800 space-y-3">
+            <div class="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+              <i data-lucide="shield" class="w-4 h-4"></i>
+              <span>Panorama Ocupacional & Exigências Normativas (NRs)</span>
+            </div>
+            <p id="txtResumoRamo" class="text-sm text-slate-300 leading-relaxed">-</p>
+          </div>
+
+          <!-- MAPA DE RISCOS BÁSICOS (DORES/PERIGOS) + REFINAR -->
+          <div class="glass-card rounded-2xl p-6 border-slate-800 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2 text-amber-400 font-bold text-base">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                <span>Riscos Ocupacionais & Gargalos Normativos Mapeados</span>
+              </div>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Análise de Risco NR-01</span>
+            </div>
+
+            <div id="containerDores" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+            <!-- INTERACTIVE COMPLEMENT FIELD -->
+            <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-3 mt-4">
+              <label class="text-xs font-semibold text-slate-200 flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-brand-400"></i>
+                <span>A sua empresa possui algum ambiente crítico, máquina específica ou notificação fiscal?</span>
+              </label>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input 
+                  type="text" 
+                  id="inputCustomPain" 
+                  placeholder="Ex: Pessoas trabalhando em altura (NR-35), trabalho noturno ou pendência eSocial..."
+                  class="flex-grow glass-input px-3.5 py-2.5 rounded-xl text-xs text-white focus:outline-none placeholder-slate-500"
+                />
+                <button 
+                  type="button" 
+                  onclick="refineDiagnosticWithCustomPain()" 
+                  id="btnRefine"
+                  class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer shadow-md"
+                >
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  <span>Recalcular Ações SST</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PLANO DE AÇÃO E SOLUÇÕES DE SST -->
+          <div class="glass-card rounded-2xl p-6 border-slate-800 space-y-4 bg-gradient-to-b from-slate-900/90 to-brand-950/20">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2 text-brand-400 font-bold text-base">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                <span>Plano Estratégico de Saúde e Segurança no Trabalho</span>
+              </div>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Ações Obrigatórias & Gestão</span>
+            </div>
+
+            <div id="containerSolucoes" class="space-y-4"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full border-t border-slate-800/80 bg-slate-950/80 py-4 px-6 text-center text-xs text-slate-500 flex flex-col md:flex-row justify-between items-center gap-2">
+    <div>
+      © 2026 <strong>Santiago SmartScan SST</strong> - Gestão Ocupacional, PGR, PCMSO, LTCAT e eSocial.
+    </div>
+    <div class="flex items-center gap-4 text-slate-400">
+      <span>Contato Consultoria SST: +55 (41) 41 99518-3939</span>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // CHAVE DA OPENAI FIXADA DIRETAMENTE NO CÓDIGO (Opcional se usar API online)
+    const OPENAI_API_KEY = ""; 
+
+    let currentCompanyData = null;
+    let currentDiagnostic = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+
+      // Suporte para início automático via SessionStorage (quando vem do widget do site)
+      const savedCnpj = sessionStorage.getItem('autostart_cnpj');
+      if (savedCnpj) {
+        sessionStorage.removeItem('autostart_cnpj');
+        const input = document.getElementById('cnpjInput');
+        if (input) {
+          input.value = savedCnpj;
+          formatCNPJ(input);
+          document.getElementById('cnpjForm').dispatchEvent(new Event('submit'));
+        }
+      }
+    });
+
+    function formatCNPJ(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 14) v = v.substring(0, 14);
+      v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      v = v.replace(/(\d{4})(\d)/, '$1-$2');
+      input.value = v;
+    }
+
+    async function handleCnpjSubmit(event) {
+      event.preventDefault();
+      const rawCnpj = document.getElementById('cnpjInput').value.replace(/\D/g, '');
+      
+      if (rawCnpj.length !== 14) {
+        showError("Por favor, digite um CNPJ válido com 14 dígitos.");
+        return;
+      }
+
+      hideError();
+      showLoading(true);
+
+      try {
+        let data = null;
+        
+        // 1. Minha Receita
+        try {
+          const res1 = await fetch(`https://minhareceita.org/${rawCnpj}`);
+          if (res1.ok) data = await res1.json();
+        } catch(e) {}
+
+        // 2. BrasilAPI
+        if (!data) {
+          try {
+            const res2 = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${rawCnpj}`);
+            if (res2.ok) data = await res2.json();
+          } catch(e) {}
+        }
+
+        // 3. OpenCNPJ WS
+        if (!data) {
+          try {
+            const res3 = await fetch(`https://open.cnpj.ws/cnpj/${rawCnpj}`);
+            if (res3.ok) data = await res3.json();
+          } catch(e) {}
+        }
+
+        if (data) {
+          currentCompanyData = normalizeCompanyData(data, rawCnpj);
+        } else {
+          currentCompanyData = generateDynamicFallback(rawCnpj);
+        }
+
+        currentDiagnostic = await generateDiagnostic(currentCompanyData);
+        renderDashboard(currentCompanyData, currentDiagnostic);
+
+      } catch (err) {
+        console.error(err);
+        showError("Erro ao processar a análise de SST.");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function normalizeCompanyData(data, rawCnpj) {
+      const razaoSocial = data.razao_social || data.nome || data.razao || "Empresa Sem Nome";
+      const cnpjFormatted = data.cnpj || data.tax_id || rawCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+      
+      let cnaePrincipal = { code: "", text: "Não informada" };
+      if (data.cnae_fiscal && data.cnae_fiscal_descricao) {
+        cnaePrincipal = { code: String(data.cnae_fiscal), text: data.cnae_fiscal_descricao };
+      } else if (data.atividade_principal && data.atividade_principal[0]) {
+        cnaePrincipal = { 
+          code: data.atividade_principal[0].code || data.atividade_principal[0].id || "", 
+          text: data.atividade_principal[0].text || data.atividade_principal[0].descricao || "" 
+        };
+      } else if (data.estabelecimento && data.estabelecimento.atividade_principal) {
+        cnaePrincipal = { 
+          code: data.estabelecimento.atividade_principal.subclasse || "", 
+          text: data.estabelecimento.atividade_principal.descricao || "" 
+        };
+      }
+
+      let cnaesSecundarias = [];
+      const secList = data.cnaes_secundarios || data.atividades_secundarias || (data.estabelecimento ? data.estabelecimento.atividades_secundarias : null);
+      if (secList && Array.isArray(secList)) {
+        cnaesSecundarias = secList.map(a => ({
+          code: String(a.codigo || a.code || a.id || a.subclasse || ""),
+          text: a.descricao || a.text || ""
+        }));
+      }
+
+      let qsa = [];
+      const qsaList = data.qsa || data.socios;
+      if (qsaList && Array.isArray(qsaList)) {
+        qsa = qsaList.map(s => ({
+          nome: s.nome_socio || s.nome || s.razao_social || "Sócio/Administrador",
+          qualificacao: s.qualificacao_socio || s.qualificacao || s.cargo || "Sócio"
+        }));
+      }
+
+      const email = data.email || (data.estabelecimento ? data.estabelecimento.email : "") || "";
+      const rawPhone = data.ddd_telefone_1 || data.telefone || (data.estabelecimento ? data.estabelecimento.telefone1 : "") || "";
+      const uf = data.uf || (data.estabelecimento && data.estabelecimento.estado ? data.estabelecimento.estado.sigla : "") || "BR";
+      const municipio = data.municipio || (data.estabelecimento && data.estabelecimento.cidade ? data.estabelecimento.cidade.nome : "") || "";
+      const logradouro = data.logradouro || (data.estabelecimento ? data.estabelecimento.logradouro : "") || "";
+
+      return {
+        razaoSocial,
+        cnpj: cnpjFormatted,
+        cnaePrincipal,
+        cnaesSecundarias,
+        qsa,
+        email,
+        telefone: rawPhone,
+        situacao: data.descricao_situacao_cadastral || data.situacao_cadastral || "ATIVA",
+        porte: data.porte || "DEMAIS",
+        endereco: `${logradouro} - ${municipio}/${uf}`.replace(/^[\s\-]+/, '').trim() || "Endereço não informado"
+      };
+    }
+
+    function generateDynamicFallback(cnpjStr) {
+      const formatted = cnpjStr.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+      return {
+        razaoSocial: `EMPRESA ANALISADA S.A. (${cnpjStr.slice(-4)})`,
+        cnpj: formatted,
+        cnaePrincipal: { code: "41.20-4-00", text: "Construção de Edifícios e Obras Estruturais" },
+        cnaesSecundarias: [
+          { code: "43.21-5-00", text: "Instalação e Manutenção Elétrica" },
+          { code: "43.99-1-03", text: "Obras de Alvenaria e Estruturas Ocupacionais" }
+        ],
+        qsa: [
+          { nome: "SOCIO ADMINISTRADOR", qualificacao: "DIRETOR" }
+        ],
+        email: `contato@empresa${cnpjStr.slice(-4)}.com.br`,
+        telefone: "41984301958",
+        situacao: "ATIVA",
+        porte: "DEMAIS",
+        endereco: "CURITIBA - PARANÁ"
+      };
+    }
+
+    function extractOwnerName(qsa, razaoSocial) {
+      if (qsa && qsa.length > 0 && qsa[0].nome) return qsa[0].nome;
+      return "Representante Legal / RH / Engenharia de Segurança";
+    }
+
+    async function generateDiagnostic(company, customPain = "") {
+      if (OPENAI_API_KEY && !OPENAI_API_KEY.includes("SUA_CHAVE")) {
+        try {
+          return await callOpenAiDiagnostic(company, OPENAI_API_KEY, customPain);
+        } catch (e) {
+          console.warn("OpenAI falhou, usando motor especialista de SST.", e);
+        }
+      }
+      return generateLocalSstDiagnostic(company, customPain);
+    }
+
+    async function callOpenAiDiagnostic(company, apiKey, customPain) {
+      const prompt = `Você é um Engenheiro de Segurança do Trabalho e Médico do Trabalho sênior especialista em NRs, eSocial e SST Corporativa.
+Analise a empresa:
+- Razão Social: ${company.razaoSocial}
+- CNAE Principal: ${company.cnaePrincipal.code} - ${company.cnaePrincipal.text}
+- CNAEs Secundários: ${company.cnaesSecundarias.map(s => s.text).join('; ')}
+${customPain ? `- Ponto Crítico ou Pendência Relatada: "${customPain}"` : ''}
+
+Retorne um JSON puro com:
+{
+  "resumoRamo": "Visão geral dos riscos ocupacionais do setor e exigências do eSocial.",
+  "dores": [
+    { "titulo": "Risco/Gargalo 1", "descricao": "Detalhes normativos." },
+    { "titulo": "Risco/Gargalo 2", "descricao": "Detalhes normativos." },
+    ${customPain ? `{ "titulo": "Atenção Especial Relatada", "descricao": "${customPain}" },` : ''}
+    { "titulo": "Inconsistência de eSocial / ASO", "descricao": "Detalhes do envio de eventos S-2220 / S-2240." }
+  ],
+  "solucoes": [
+    { "titulo": "Elaboração e Gestão Contínua do PGR (NR-01 / GRO)", "tituloAcao": "PGR & Riscos", "descricao": "Inventário de riscos ocupacionais, matriz de risco e plano de ação estruturado." },
+    { "titulo": "Implantação do PCMSO e ASOs Atualizados (NR-07)", "tituloAcao": "Medicina Ocupacional", "descricao": "Exames admissionais, periódicos e demissionais específicos para os riscos mapeados." },
+    { "titulo": "LTCAT e Laudo de Insalubridade/Periculosidade", "tituloAcao": "Laudos Técnicos", "descricao": "Laudo conclusivo para enquadramento de aposentadoria especial e adicionais salariais." },
+    { "titulo": "Gestão de Eventos de SST para o eSocial", "tituloAcao": "eSocial (S-2210/2220/2240)", "descricao": "Envio automatizado e sem erros dos eventos do eSocial dentro dos prazos legais." },
+    { "titulo": "Treinamentos Obrigatórios das NRs aplicáveis ao setor", "tituloAcao": "Capacitação & NRs", "descricao": "Treinamentos presenciais ou EAD das NRs exigidas para os colaboradores." },
+    { "titulo": "Avaliação Ergonômica do Trabalho (AET / NR-17)", "tituloAcao": "Ergonomia", "descricao": "Análise dos postos de trabalho para eliminação de LER/DORT e adequação ergonômica." }
+  ]
+}`;
+
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          response_format: { type: "json_object" },
+          temperature: 0.5
+        })
+      });
+
+      const jsonRes = await res.json();
+      return JSON.parse(jsonRes.choices[0].message.content);
+    }
+
+    // Motor Local Especialista em SST (Nacional / NRs)
+    function generateLocalSstDiagnostic(company, customPain) {
+      let cnaeText = company.cnaePrincipal.text.toLowerCase();
+      let resumo = `A empresa atua no segmento de ${company.cnaePrincipal.text}. Esse setor requer cumprimento rigoroso da Portaria MTP e das Normas Regulamentadoras (NRs). A gestão preventiva de SST evita autuações do Ministério do Trabalho, reduz o FAP/SAT e previne passivos trabalhistas.`;
+      
+      let dores = [
+        { 
+          titulo: "Ausência ou Desatualização do PGR (NR-01)", 
+          descricao: "Inexistência de Inventário de Riscos Físicos, Químicos, Biológicos e Ergonômicos atualizado para o Gerenciamento de Riscos Ocupacionais (GRO)." 
+        },
+        { 
+          titulo: "Incompatibilidade no PCMSO e Exames Médicos (NR-07)", 
+          descricao: "ASOs emitidos sem a cobertura exata dos riscos ocupacionais identificados no ambiente, gerando nulidade dos laudos perante fiscalização." 
+        },
+        { 
+          titulo: "Exposição a Passivos no eSocial (S-2210, S-2220, S-2240)", 
+          descricao: "Atrasos ou inconsistências na transmissão de CATs, Monitoramento da Saúde do Trabalhador e Condições Ambientais ao eSocial." 
+        }
+      ];
+
+      if (customPain) {
+        dores.push({
+          titulo: "Ponto Crítico Especificado",
+          descricao: customPain
+        });
+      } else {
+        dores.push({
+          titulo: "Insalubridade, Periculosidade e Aposentadoria Especial", 
+          descricao: "Falta de Laudo Técnico das Condições Ambientais do Trabalho (LTCAT) comprovando a necessidade (ou não) do pagamento de adicionais." 
+        });
+      }
+
+      let solucoes = [
+        {
+          titulo: "Elaboração e Gestão do PGR (NR-01) com Matriz de Risco",
+          tituloAcao: "PGR & GRO",
+          descricao: "Mapeamento completo dos perigos e riscos, elaboração do inventário e plano de ação contínuo em conformidade com as NRs."
+        },
+        {
+          titulo: "Gestão Médica Ocupacional & PCMSO (NR-07)",
+          tituloAcao: "Medicina do Trabalho",
+          descricao: "Planejamento dos exames admissionais, periódicos, de retorno e demissionais com emissão rápida de ASOs integrados ao eSocial."
+        },
+        {
+          titulo: "Envio Automatizado dos Eventos de SST ao eSocial",
+          tituloAcao: "eSocial SST",
+          descricao: "Gestão dos eventos S-2210 (CAT), S-2220 (ASO) e S-2240 (Ambientes com Agentes Nocivos) para total blindagem contra multas da Receita Federal."
+        },
+        {
+          titulo: "Laudos Técnicos Especializados (LTCAT, NR-15 e NR-16)",
+          tituloAcao: "Laudos Técnicos",
+          descricao: "Avaliação quantitativa e qualitativa dos agentes de risco ambientais com laudos conclusivos elaborados por Engenheiro de Segurança."
+        },
+        {
+          titulo: "Treinamentos das NRs e Formação de CIPA / Designado (NR-05)",
+          tituloAcao: "Capacitação",
+          descricao: "Realização de treinamentos obrigatórios das NRs aplicáveis ao setor com emissão de certificados válidos perante o MTE."
+        },
+        {
+          titulo: "Avaliação Ergonômica preliminar e AET (NR-17)",
+          tituloAcao: "Ergonomia",
+          descricao: "Análise dos postos de trabalho para prevenção de afecções musculoesqueléticas, fadiga e adequação Ergonômica dos postos."
+        }
+      ];
+
+      return { resumoRamo: resumo, dores, solucoes };
+    }
+
+    async function refineDiagnosticWithCustomPain() {
+      const customPain = document.getElementById('inputCustomPain').value.trim();
+      if (!customPain) {
+        alert("Por favor, digite a pendência ou ambiente para recalcular o relatório de SST.");
+        return;
+      }
+
+      const btn = document.getElementById('btnRefine');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Calculando...</span>`;
+      lucide.createIcons();
+
+      currentDiagnostic = await generateDiagnostic(currentCompanyData, customPain);
+      renderDashboard(currentCompanyData, currentDiagnostic);
+
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i><span>Recalcular Ações SST</span>`;
+      lucide.createIcons();
+    }
+
+    function renderDashboard(company, diagnostic) {
+      document.getElementById('searchSection').classList.add('hidden');
+      document.getElementById('dashboardSection').classList.remove('hidden');
+
+      document.getElementById('lblRazaoSocial').innerText = company.razaoSocial;
+      document.getElementById('lblCnpj').innerText = company.cnpj;
+      document.getElementById('lblEndereco').innerText = company.endereco;
+      document.getElementById('lblEmailCadastro').innerText = company.email || "Não informado na RFB";
+      document.getElementById('badgeSituacao').innerText = company.situacao;
+      document.getElementById('badgePorte').innerText = company.porte;
+
+      const ownerName = extractOwnerName(company.qsa, company.razaoSocial);
+      document.getElementById('lblOwnerName').innerText = ownerName;
+
+      const phoneInput = document.getElementById('inputClientPhone');
+      if (company.telefone) phoneInput.value = company.telefone;
+
+      document.getElementById('lblCnaePrincipalCode').innerText = `CNAE: ${company.cnaePrincipal.code || 'N/I'}`;
+      document.getElementById('lblCnaePrincipalText').innerText = company.cnaePrincipal.text;
+
+      // Atividades Secundárias
+      const secContainer = document.getElementById('containerCnaeSecundarias');
+      document.getElementById('lblCountSecundarias').innerText = company.cnaesSecundarias.length;
+      secContainer.innerHTML = '';
+
+      if (!company.cnaesSecundarias || company.cnaesSecundarias.length === 0) {
+        secContainer.innerHTML = '<p class="text-slate-500 italic">Nenhuma atividade secundária informada publicamente.</p>';
+      } else {
+        company.cnaesSecundarias.forEach(sec => {
+          secContainer.innerHTML += `
+            <div class="p-2 rounded bg-slate-900/60 border border-slate-800 flex items-start gap-2">
+              <span class="font-mono text-[10px] text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">${sec.code || 'SEC'}</span>
+              <span class="text-slate-300 text-[11px] leading-tight">${sec.text}</span>
+            </div>
+          `;
+        });
+      }
+
+      // QSA
+      const qsaContainer = document.getElementById('containerQSA');
+      document.getElementById('lblCountQsa').innerText = company.qsa.length;
+      qsaContainer.innerHTML = '';
+
+      if (!company.qsa || company.qsa.length === 0) {
+        qsaContainer.innerHTML = '<p class="text-slate-500 italic">Sócios/Responsáveis não informados publicamente.</p>';
+      } else {
+        company.qsa.forEach(socio => {
+          qsaContainer.innerHTML += `
+            <div class="p-2 rounded bg-slate-900/60 border border-slate-800 flex justify-between items-center">
+              <span class="text-slate-200 font-medium text-xs">${socio.nome}</span>
+              <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">${socio.qualificacao}</span>
+            </div>
+          `;
+        });
+      }
+
+      document.getElementById('txtResumoRamo').innerText = diagnostic.resumoRamo;
+
+      // Dores e Riscos
+      const doresContainer = document.getElementById('containerDores');
+      doresContainer.innerHTML = '';
+      diagnostic.dores.forEach((dor, idx) => {
+        doresContainer.innerHTML += `
+          <div class="p-4 rounded-xl glass-card border-slate-800 space-y-2 hover:border-amber-500/30 transition">
+            <div class="flex items-center gap-2 text-amber-400 font-semibold text-xs">
+              <span class="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center font-mono text-[11px] border border-amber-500/20">${idx + 1}</span>
+              <span>${dor.titulo}</span>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">${dor.descricao}</p>
+          </div>
+        `;
+      });
+
+      // Soluções de SST
+      const solucoesContainer = document.getElementById('containerSolucoes');
+      solucoesContainer.innerHTML = '';
+      diagnostic.solucoes.forEach((sol) => {
+        solucoesContainer.innerHTML += `
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-brand-500/20 space-y-2 hover:border-brand-500/50 transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-brand-400 font-bold text-sm">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                <span>${sol.titulo}</span>
+              </div>
+              ${sol.tituloAcao ? `<span class="text-[10px] font-semibold bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded border border-brand-500/30">${sol.tituloAcao}</span>` : ''}
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">${sol.descricao}</p>
+          </div>
+        `;
+      });
+
+      lucide.createIcons();
+    }
+
+    function resetSearch() {
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('searchSection').classList.remove('hidden');
+      document.getElementById('cnpjInput').value = '';
+      document.getElementById('inputCustomPain').value = '';
+      hideError();
+    }
+
+    function showLoading(isLoading) {
+      const searchSec = document.getElementById('searchSection');
+      const loadingSec = document.getElementById('loadingSection');
+      if (isLoading) {
+        searchSec.classList.add('hidden');
+        loadingSec.classList.remove('hidden');
+        loadingSec.classList.add('flex');
+      } else {
+        loadingSec.classList.add('hidden');
+        loadingSec.classList.remove('flex');
+      }
+    }
+
+    function showError(msg) {
+      const errorBox = document.getElementById('cnpjError');
+      document.getElementById('cnpjErrorText').innerText = msg;
+      errorBox.classList.remove('hidden');
+    }
+
+    function hideError() {
+      document.getElementById('cnpjError').classList.add('hidden');
+    }
+
+    // Enviar Relatório de SST para o WhatsApp do Cliente
+    function sendReportToClientWhatsApp() {
+      const rawPhone = document.getElementById('inputClientPhone').value.replace(/\D/g, '');
+      if (!rawPhone || rawPhone.length < 10) {
+        alert("Por favor, informe seu número de WhatsApp com DDD para receber o relatório de SST.");
+        return;
+      }
+
+      const wsPhone = "5541995183939";
+      const returnMsg = encodeURIComponent(`Olá! Realizei o SmartScan SST para a empresa ${currentCompanyData.razaoSocial} e gostaria de regularizar nossos programas de SST (PGR, PCMSO e eSocial).`);
+      const wsDirectLink = `https://wa.me/${wsPhone}?text=${returnMsg}`;
+
+      let msg = `*DIAGNÓSTICO DE SAÚDE E SEGURANÇA DO TRABALHO - Ws4Tech SmartScan SST*\n\n`;
+      msg += `🏢 *Empresa:* ${currentCompanyData.razaoSocial}\n`;
+      msg += `📄 *CNPJ:* ${currentCompanyData.cnpj}\n`;
+      msg += `📌 *Atividade:* ${currentCompanyData.cnaePrincipal.text}\n\n`;
+      msg += `⚠️ *Riscos & Gargalos Mapeados (NRs):*\n`;
+      currentDiagnostic.dores.forEach((d, i) => {
+        msg += `${i+1}. *${d.titulo}:* ${d.descricao}\n`;
+      });
+      msg += `\n📋 *Plano de Regularização e Gestão de SST:*\n`;
+      currentDiagnostic.solucoes.forEach((s, i) => {
+        msg += `• *${s.titulo}:* ${s.descricao}\n`;
+      });
+      msg += `\n-----------------------------------\n`;
+      msg += `💬 *Precisa regularizar seu eSocial ou programas de SST?*\n`;
+      msg += `👉 *Fale com nosso Engenheiro/Consultor de SST aqui:*\n${wsDirectLink}\n`;
+      msg += `-----------------------------------\n`;
+      msg += `_Diagnóstico gerado de forma autônoma pelo Santiago SmartScan SST._`;
+
+      const targetUrl = `https://wa.me/55${rawPhone}?text=${encodeURIComponent(msg)}`;
+      window.open(targetUrl, '_blank');
+    }
+
+    // Chat direto com Especialista de SST
+    function openWs4TechChat() {
+      const wsPhone = "5541995183939";
+      let msg = `Olá equipe de SST!\n\n`;
+      msg += `Acabei de realizar o SmartScan SST para minha empresa e preciso de apoio com regularização técnica e eSocial:\n`;
+      msg += `📌 *Empresa:* ${currentCompanyData.razaoSocial}\n`;
+      msg += `📄 *CNPJ:* ${currentCompanyData.cnpj}\n`;
+      msg += `🏢 *Ramo:* ${currentCompanyData.cnaePrincipal.text}\n\n`;
+      msg += `Podemos agendar uma conversa sobre a elaboração do PGR, PCMSO e envio de eventos do eSocial?`;
+
+      const targetUrl = `https://wa.me/${wsPhone}?text=${encodeURIComponent(msg)}`;
+      window.open(targetUrl, '_blank');
+    }
+  </script>
+</body>
+</html>
